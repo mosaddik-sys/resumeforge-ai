@@ -1,0 +1,1021 @@
+{
+  "name": "RESUMEFORGE",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "resume",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        -1328,
+        352
+      ],
+      "id": "f8f7913e-e309-49d7-9a90-d94aab4d8e4d",
+      "name": "PDF-2",
+      "notesInFlow": true,
+      "notes": "JSON CONVERT"
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "binaryPropertyName": "resume",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        -1328,
+        144
+      ],
+      "id": "b301cbec-0cbd-4a49-8501-ddddde989a92",
+      "name": "TXT-2",
+      "notesInFlow": true,
+      "notes": "JSON CONVERT"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "job_post",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        -1328,
+        -240
+      ],
+      "id": "e6ae665d-5e15-45b4-8e21-1b47f6338b94",
+      "name": "PDF-1",
+      "notesInFlow": true,
+      "notes": "JSON CONVERT"
+    },
+    {
+      "parameters": {
+        "description": "This tool performs an internal reasoning process before the cover letter is written. When called, it analyzes the job post to identify the top three most critical requirements and preferred qualifications. It then analyzes the resume to extract the candidates top three relevant skills, achievements, and experiences that directly match those requirements. Finally, it establishes a logical connection between the candidates background and the companys needs. The tool does not output any visible text. It only prepares structured reasoning for the agent to use when writing the cover letter."
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1.1,
+      "position": [
+        -208,
+        32
+      ],
+      "id": "a70956aa-e024-4d07-b3c9-844fea05b729",
+      "name": "Think"
+    },
+    {
+      "parameters": {
+        "description": "This tool performs an internal reasoning process before the resume summary is written. When called, it analyzes the job post to extract the most important keywords and required skills. It then scans the resume to filter the candidates most relevant experience, job titles, and quantifiable achievements that align with those keywords. It also identifies the candidates unique value proposition for this specific role. The tool does not output any visible text. It only prepares structured reasoning for the agent to use when writing the summary."
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1.1,
+      "position": [
+        -80,
+        32
+      ],
+      "id": "6550bf0f-64d8-46ef-966f-9c908cafef20",
+      "name": "Think1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "responsesApiEnabled": false,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -352,
+        32
+      ],
+      "id": "db0edf3f-9cb9-4558-af57-4e9e382df609",
+      "name": "OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "gbX2dpZS4ar77nku",
+          "name": "OpenAI account 424"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        64,
+        32
+      ],
+      "id": "319eef49-84c0-44db-a6c7-5ddbf73dad76",
+      "name": "Google Gemini",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "7ii6dCHzPX1rdg3A",
+          "name": "Google Gemini(PaLM) Api account 1361"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=This is Job post:\n\n {{ $json['JOB POST'][0] }}\n\nThis is resume:\n\n{{ $json.RESUME[0] }}",
+        "needsFallback": true,
+        "options": {
+          "systemMessage": "You are a professional Cover Letter Writer Agent. Your task is to generate a personalized and persuasive cover letter in HTML format. The output must be a complete, self-contained HTML document with embedded CSS. The design must be professional, modern, and stylish with a dark black background and elegant white typography.\n\nYou are equipped with a Think Tool that you must always call before writing the final cover letter. You must validate the input data before proceeding.\n\nValidation Rules\n\nCheck the job post input. If the job post is missing, empty, or contains any error message from the previous image analyzer node such as \"Invalid image. Please upload a clear image of a job posting\", then you must stop and output exactly: \"Invalid job post. Please upload a clear image of a job posting or paste the job description as text.\"\n\nCheck the resume input. If the resume is missing, empty, or contains unreadable text, then you must stop and output exactly: \"Invalid resume. Please upload a valid resume in PDF or text format.\"\n\nIf both inputs are valid, proceed to call the Think Tool. After the Think Tool returns its reasoning, write the final cover letter.\n\nOutput Format Requirements\n\nYou must output a complete HTML document. The HTML must include:\n\nDOCTYPE html declaration\nhtml tag with lang attribute\nhead section with meta charset and viewport settings\nstyle section with all CSS rules\nbody section containing the cover letter content\n\nCSS Design Requirements\n\nBackground color: pure black (#000000) or very dark (#0a0a0a)\nText color: white (#ffffff) or off-white (#f5f5f5)\nFont family: 'Segoe UI', Tahoma, Geneva, Verdana, or any clean sans-serif\nFont size: 16px for body, 24px for headings\nLine height: 1.8 for readability\nMax width: 800px, centered with margin auto\nPadding: 40px\nSubtle border: 1px solid #333333 with border-radius: 12px\nBox shadow: 0 8px 32px rgba(0,0,0,0.6)\nHeading color: #ffffff with bottom border: 2px solid #4a9eff\nParagraph spacing: 20px margin between sections\nSignature section with proper spacing\n\nThe cover letter must be between 250 and 400 words. It must directly address the hiring manager, highlight the candidates relevant skills and achievements from the resume, and connect them to the job requirements. The tone must be formal, confident, and professional.\n\nOutput only the complete HTML document. Do not include any reasoning, validation messages, or extra commentary in the final output. Do not wrap the HTML in markdown code blocks. Output raw HTML directly."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -176,
+        -240
+      ],
+      "id": "e34fedfc-594a-465b-a542-18cf7edec0c7",
+      "name": "COVER LETTER"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=This is Job post:\n\n {{ $json['JOB POST'][0] }}\n\nThis is resume:\n\n{{ $json.RESUME[0] }}",
+        "needsFallback": true,
+        "options": {
+          "systemMessage": "You are a professional Resume Summary Writer Agent. Your task is to generate a concise and powerful resume summary in HTML format. The output must be a complete, self-contained HTML document with embedded CSS. The design must be professional, modern, and stylish with a dark black background and elegant white typography.\n\nYou are equipped with a Think Tool that you must always call before writing the final summary. You must validate the input data before proceeding.\n\nValidation Rules\n\nCheck the job post input. If the job post is missing, empty, or contains any error message from the previous image analyzer node such as \"Invalid image. Please upload a clear image of a job posting\", then you must stop and output exactly: \"Invalid job post. Please upload a clear image of a job posting or paste the job description as text.\"\n\nCheck the resume input. If the resume is missing, empty, or contains unreadable text, then you must stop and output exactly: \"Invalid resume. Please upload a valid resume in PDF or text format.\"\n\nIf both inputs are valid, proceed to call the Think Tool. After the Think Tool returns its reasoning, write the final resume summary.\n\nOutput Format Requirements\n\nYou must output a complete HTML document. The HTML must include:\n\nDOCTYPE html declaration\nhtml tag with lang attribute\nhead section with meta charset and viewport settings\nstyle section with all CSS rules\nbody section containing the resume summary content\n\nCSS Design Requirements\n\nBackground color: pure black (#000000) or very dark (#0a0a0a)\nText color: white (#ffffff) or off-white (#f5f5f5)\nFont family: 'Segoe UI', Tahoma, Geneva, Verdana, or any clean sans-serif\nFont size: 18px for body, 22px for heading\nLine height: 1.8 for readability\nMax width: 800px, centered with margin auto\nPadding: 40px\nSubtle border: 1px solid #333333 with border-radius: 12px\nBox shadow: 0 8px 32px rgba(0,0,0,0.6)\nHeading color: #ffffff with bottom border: 2px solid #27ae60\nSummary content background: rgba(39, 174, 96, 0.08) with left border: 4px solid #27ae60\nPadding: 20px inside summary block\n\nThe summary must be exactly 3 to 4 sentences long. It must highlight the candidates most relevant skills, years of experience, and key achievements that match the job description. Use action-oriented language and proper paragraph structure. Do not use bullet points.\n\nOutput only the complete HTML document. Do not include any reasoning, validation messages, or extra commentary in the final output. Do not wrap the HTML in markdown code blocks. Output raw HTML directly."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -176,
+        272
+      ],
+      "id": "bfcfece4-2276-42e0-982d-2ec7826332e3",
+      "name": "RESUME SUMMERY"
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "binaryPropertyName": "job_post",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        -1328,
+        -432
+      ],
+      "id": "517e09f3-ec29-44a7-b11f-ef223016c187",
+      "name": "TXT-1",
+      "notesInFlow": true,
+      "notes": "JSON CONVERT"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "text": "You are a strict and precise Image-to-Job-Description OCR and Validation Agent. Analyze the uploaded image thoroughly.\n\nStrict Instructions:\n1. You MUST return a response in the following JSON format ONLY. No other text, greetings, or markdown are allowed:\n{\"is_valid\": boolean, \"content\": \"string\"}\n\n2. Validation Rules (MUST follow strictly):\n   - Determine if the image contains a formal Job Posting / Job Advertisement.\n   - A valid job posting must include at least 3 of these 5 key elements:\n     a) Job Title (e.g., \"Software Engineer\").\n     b) Company Name (e.g., \"Google\").\n     c) Job Responsibilities/Duties.\n     d) Job Requirements/Qualifications.\n     e) Employment Type (e.g., \"Full-time\", \"Remote\").\n\n3. If the image is VALID (contains a job posting):\n   - Extract ALL the text exactly as it appears in the image (perfect OCR).\n   - Preserve the original structure, paragraphs, and section headers (e.g., \"Responsibilities:\", \"Requirements:\").\n   - Do NOT summarize, paraphrase, or translate. Output the exact raw text in the \"content\" field.\n   - Set \"is_valid\" to true.\n\n4. If the image is INVALID (does NOT match job posting criteria):\n   - Set \"is_valid\" to false.\n   - In the \"content\" field, write exactly: \"Invalid image. Please upload a clear image of a job posting (job description).\"\n\n5. Strict Rejection Rules (REJECT immediately if any apply):\n   - If you see a Resume/CV (even if it has \"Objective\" or \"Experience\").\n   - If you see a random photo, landscape, meme, logo without text, or group photo.\n   - If you see a table, spreadsheet, code snippet, or invoice.\n   - If the image is blurry, low-resolution, or unreadable.\n\n6. Do NOT hallucinate or add any information that is not visible in the image. If it is not a clear job ad, reject it.\n\nNow, analyze the provided image and return the JSON result:",
+        "inputType": "base64",
+        "binaryPropertyName": "job_post",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        -1328,
+        -48
+      ],
+      "id": "6d0da79d-f62b-4963-b332-8eebcef7bd8c",
+      "name": "IMAGE",
+      "credentials": {
+        "openAiApi": {
+          "id": "gbX2dpZS4ar77nku",
+          "name": "OpenAI account 424"
+        }
+      },
+      "notes": "IMAGE TO JOB POST TEXT"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2bd4915e-447c-4270-82fc-65e50ec633b7",
+              "name": "JOB POST",
+              "value": "={{ $json.data }}  {{ $json.text }}  {{ $json['0'].content[0].text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1104,
+        -240
+      ],
+      "id": "48cf4cef-fa57-405f-bcd8-1c42eca9a1e7",
+      "name": "SET-1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "396fbc26-b39a-4e68-bdc8-ac3541273a53",
+              "name": "RESUME",
+              "value": "={{ $json.data }} {{ $json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1104,
+        240
+      ],
+      "id": "f8dd94bc-f524-48ae-a1cb-90051699a250",
+      "name": "SET-2"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -880,
+        16
+      ],
+      "id": "68a0dda6-3c81-4db4-9878-1d72e1b1eeb6",
+      "name": "MERGE-1",
+      "notesInFlow": true,
+      "notes": "SYNCHONIZE FLOW"
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "JOB POST"
+            },
+            {
+              "fieldToAggregate": "RESUME"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        -656,
+        16
+      ],
+      "id": "05df7fd0-8f57-4fb7-8d37-bb88729ca875",
+      "name": "AGREGATE-1"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('WEBHOOK TRIGGER').item.json.body.job_post.mime }}",
+                    "rightValue": "text/plain",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "543f9199-1f85-45d8-aed4-d81df8c55b73"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "TEXT"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "599b1573-7748-4107-b92c-2a62d29cc965",
+                    "leftValue": "={{ $('WEBHOOK TRIGGER').item.json.body.job_post.mime }}",
+                    "rightValue": "application/pdf",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "PDF"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -1552,
+        -256
+      ],
+      "id": "2c170486-0adb-4b14-899f-1b7c837d05bb",
+      "name": "TYPE CHECK-1"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('WEBHOOK TRIGGER').item.json.body.resume.mime }}",
+                    "rightValue": "text/plain",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "51417054-4941-4811-bf04-82a30c906786"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "TEXT"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "feb563f5-b39c-4ebf-a11a-37f35df442f3",
+                    "leftValue": "={{ $('WEBHOOK TRIGGER').item.json.body.resume.mime }}",
+                    "rightValue": "application/pdf",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "PDF"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -1552,
+        240
+      ],
+      "id": "7b161e34-dca9-47b8-bd76-6e53cbdd9203",
+      "name": "TYPE CHECK-2"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nif (!items || items.length === 0) {\n  throw new Error('No input data received');\n}\n\nconst firstItem = items[0];\nconst body = firstItem.json?.body || firstItem.json;\n\nif (!body || !body.job_post || !body.resume) {\n  throw new Error('Missing job_post or resume data. Please check webhook input.');\n}\n\nconst jobPostBuffer = Buffer.from(body.job_post.base64, 'base64');\nconst resumeBuffer = Buffer.from(body.resume.base64, 'base64');\n\nreturn [\n  {\n    json: {\n      user_email: body.user_email || 'unknown',\n      user_id: body.user_id || 'unknown'\n    },\n    binary: {\n      job_post: {\n        data: jobPostBuffer.toString('base64'),\n        mimeType: body.job_post.mime || 'text/plain',\n        fileName: body.job_post.filename || 'job_post.txt'\n      },\n      resume: {\n        data: resumeBuffer.toString('base64'),\n        mimeType: body.resume.mime || 'text/plain',\n        fileName: body.resume.filename || 'resume.txt'\n      }\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1776,
+        16
+      ],
+      "id": "7e94543c-db38-4290-a9a7-31bab6ce2cef",
+      "name": "BINARY CONVERT"
+    },
+    {
+      "parameters": {
+        "resource": "conversion",
+        "htmlContent": "={{ $json.output }}",
+        "filename": "COVER LETTER",
+        "conversionOptions": {
+          "conversionOutput": "file"
+        }
+      },
+      "type": "@pdfgeneratorapi/n8n-nodes-pdf-generator-api.pdfGeneratorApi",
+      "typeVersion": 1,
+      "position": [
+        288,
+        -240
+      ],
+      "id": "f8764cf2-a03f-4f29-a6a6-c88a82236a20",
+      "name": "COVER LETTER PDF",
+      "credentials": {
+        "pdfGeneratorApi": {
+          "id": "hFNO8QdDhhrdv1WM",
+          "name": "PDF Generator account 15"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "conversion",
+        "htmlContent": "={{ $json.output }}",
+        "filename": "RESUME SUMMERY",
+        "conversionOptions": {
+          "conversionOutput": "file"
+        }
+      },
+      "type": "@pdfgeneratorapi/n8n-nodes-pdf-generator-api.pdfGeneratorApi",
+      "typeVersion": 1,
+      "position": [
+        288,
+        272
+      ],
+      "id": "8f6acef7-0b1b-4bad-8a24-8f5241d4dd56",
+      "name": "RESUME SUMMERY PDF",
+      "credentials": {
+        "pdfGeneratorApi": {
+          "id": "hFNO8QdDhhrdv1WM",
+          "name": "PDF Generator account 15"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "binaryToPropery",
+        "binaryPropertyName": "COVER LETTER.pdf",
+        "destinationKey": "COVER LETTER",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        672,
+        -240
+      ],
+      "id": "2400cf41-57eb-45d5-b9b4-2b3f16a3491e",
+      "name": "BASE64 CONVERT-1",
+      "notesInFlow": true,
+      "notes": "FOR RESPONSE TO WEBHOOK"
+    },
+    {
+      "parameters": {
+        "operation": "binaryToPropery",
+        "binaryPropertyName": "RESUME SUMMERY.pdf",
+        "destinationKey": "RESUME SUMMERY",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        672,
+        272
+      ],
+      "id": "f0186c14-839c-4c47-b799-a24fb2a38334",
+      "name": "BASE64 CONVERT-2",
+      "notesInFlow": true,
+      "notes": "FOR RESPONSE TO WEBHOOK"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1152,
+        16
+      ],
+      "id": "ad95c551-de6a-4ca5-933b-4ad0ae2c61dd",
+      "name": "MERGE-2",
+      "notes": "SYNCHONIZE FLOW"
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "COVER LETTER"
+            },
+            {
+              "fieldToAggregate": "RESUME SUMMERY"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        1392,
+        16
+      ],
+      "id": "2fbe686a-a242-4e11-a736-a43c6ae6cd50",
+      "name": "AGREGATE-2"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "5454",
+        "responseMode": "responseNode",
+        "options": {
+          "binaryPropertyName": "data"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -2000,
+        16
+      ],
+      "id": "200afea9-9944-4a48-93d1-2382fc053cdd",
+      "name": "WEBHOOK TRIGGER",
+      "webhookId": "ed0c58d1-0c56-4fff-8689-8c8f107d4d8b"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"cover_letter_pdf_base64\": \"{{ $json['COVER LETTER'][0] }}\",\n  \"resume_summary_pdf_base64\": \"{{ $json['RESUME SUMMERY'][0] }}\"\n}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1616,
+        16
+      ],
+      "id": "24edf198-83fc-42a7-9deb-25e3fca6136a",
+      "name": "WEBHOOK RESPONSE"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\n\nconst userEmail = $('WEBHOOK TRIGGER').first().json.body.user_email;\n\nconst coverLetterBase64 = $('AGREGATE-2').first().json['COVER LETTER'][0];\n\nconst resumeSummaryBase64 = $('AGREGATE-2').first().json['RESUME SUMMERY'][0];\n\nfunction createBinaryData(base64String, fileName, mimeType = 'application/pdf') {\n    if (!base64String) {\n        throw new Error(`Base64 data missing for ${fileName}`);\n    }\n    const buffer = Buffer.from(base64String, 'base64');\n    return {\n        data: buffer.toString('base64'),\n        mimeType: mimeType,\n        fileName: fileName\n    };\n}\n\nreturn [\n    {\n        json: {\n            user_email: userEmail  \n        },\n        binary: {\n            cover_letter_pdf: createBinaryData(coverLetterBase64, 'Cover_Letter.pdf'),\n            resume_summary_pdf: createBinaryData(resumeSummaryBase64, 'Resume_Summary.pdf')\n        }\n    }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1824,
+        16
+      ],
+      "id": "cfc850d3-80c8-472d-959a-f6a492f08339",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.user_email }}",
+        "subject": "ResumeForge Documents delivery",
+        "emailType": "text",
+        "message": "=Hi there,\n\nYour ResumeForge documents are ready! Please check the attached PDF files for your personalized cover letter and resume summary.\n\nThanks for choosing ResumeForge.\n\nCheers,\nResumeForge Team",
+        "options": {
+          "appendAttribution": false,
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {
+                "property": "cover_letter_pdf"
+              },
+              {
+                "property": "resume_summary_pdf"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2032,
+        16
+      ],
+      "id": "02f72e48-2bd6-4d59-a5ae-098268c99985",
+      "name": "Send a message",
+      "webhookId": "d1135808-481e-457e-b4ee-f9cbfa1c327c",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "Qix6qoyJkHPH0uNI",
+          "name": "Gmail account 710"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "WEBSITE URL :\n\nhttps://resumeforge-bice-chi.vercel.app",
+        "height": 128,
+        "width": 224,
+        "color": "#413A3A"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        416,
+        16
+      ],
+      "typeVersion": 1,
+      "id": "e8897920-5326-4744-a3cc-c901721e62db",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "PDF-1": {
+      "main": [
+        [
+          {
+            "node": "SET-1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TXT-2": {
+      "main": [
+        [
+          {
+            "node": "SET-2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PDF-2": {
+      "main": [
+        [
+          {
+            "node": "SET-2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think": {
+      "ai_tool": [
+        [
+          {
+            "node": "COVER LETTER",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think1": {
+      "ai_tool": [
+        [
+          {
+            "node": "RESUME SUMMERY",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "COVER LETTER",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "RESUME SUMMERY",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "COVER LETTER",
+            "type": "ai_languageModel",
+            "index": 1
+          },
+          {
+            "node": "RESUME SUMMERY",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "COVER LETTER": {
+      "main": [
+        [
+          {
+            "node": "COVER LETTER PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RESUME SUMMERY": {
+      "main": [
+        [
+          {
+            "node": "RESUME SUMMERY PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TXT-1": {
+      "main": [
+        [
+          {
+            "node": "SET-1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IMAGE": {
+      "main": [
+        [
+          {
+            "node": "SET-1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SET-1": {
+      "main": [
+        [
+          {
+            "node": "MERGE-1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SET-2": {
+      "main": [
+        [
+          {
+            "node": "MERGE-1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "MERGE-1": {
+      "main": [
+        [
+          {
+            "node": "AGREGATE-1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AGREGATE-1": {
+      "main": [
+        [
+          {
+            "node": "COVER LETTER",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RESUME SUMMERY",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TYPE CHECK-1": {
+      "main": [
+        [
+          {
+            "node": "TXT-1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "PDF-1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "IMAGE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TYPE CHECK-2": {
+      "main": [
+        [
+          {
+            "node": "TXT-2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "PDF-2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BINARY CONVERT": {
+      "main": [
+        [
+          {
+            "node": "TYPE CHECK-2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "TYPE CHECK-1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "COVER LETTER PDF": {
+      "main": [
+        [
+          {
+            "node": "BASE64 CONVERT-1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RESUME SUMMERY PDF": {
+      "main": [
+        [
+          {
+            "node": "BASE64 CONVERT-2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BASE64 CONVERT-1": {
+      "main": [
+        [
+          {
+            "node": "MERGE-2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BASE64 CONVERT-2": {
+      "main": [
+        [
+          {
+            "node": "MERGE-2",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "MERGE-2": {
+      "main": [
+        [
+          {
+            "node": "AGREGATE-2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AGREGATE-2": {
+      "main": [
+        [
+          {
+            "node": "WEBHOOK RESPONSE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WEBHOOK TRIGGER": {
+      "main": [
+        [
+          {
+            "node": "BINARY CONVERT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WEBHOOK RESPONSE": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "ce933d86-2904-469c-8da3-f94e3485feb1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5f00bba974abf03cb5183d4d65f8a9645a781b04770df6a7d08284fca87d50b3"
+  },
+  "nodeGroups": [],
+  "id": "lFdijeKyedNgrfYE",
+  "tags": []
+}
